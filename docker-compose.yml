@@ -7,6 +7,8 @@ services:
     stop_signal: SIGINT
     build:
       context: .
+      args:
+        BOT_NAME: ${BOT_NAME}
     working_dir: "/usr/src/app/${BOT_NAME}"
     volumes:
       - .:/usr/src/app/${BOT_NAME}
