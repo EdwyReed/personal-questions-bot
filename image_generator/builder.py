@@ -61,7 +61,7 @@ def generate_image(text: str, option: str = "1.jpg", result_file_name: str = "1.
     for line in lines:
         line_width, line_height = draw.textsize(line, font)
         x = (image_width - line_width) // 2
-        draw.text((x, y), line, fill="black", font=font)
+        draw.text((x, y), line, fill="white", font=font)
         y += line_height
 
     # Save the modified image
