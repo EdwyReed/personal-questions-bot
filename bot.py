@@ -99,7 +99,7 @@ async def main():
 
     await bot.set_my_commands(
         [
-            BotCommand(command="/start", description="Ссылка"),
+            BotCommand(command="/start", description="Отправить анонимное сообщение"),
         ],
         scope=BotCommandScopeDefault(),
     )

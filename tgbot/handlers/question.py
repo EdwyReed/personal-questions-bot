@@ -16,9 +16,9 @@ question_router = Router()
 @question_router.message(StateFilter(QuestionStates.WAIT_FOR_QUESTION_STATE))
 async def question_handler(message: Message, state: FSMContext, repo: RequestsRepo):
     """
-    Handle the user's question and send it to the recipient.
+    Handle the user's message and send it to the admin.
     """
-    logging.info("User %s sent question", message.from_user.id)
+    logging.info("User %s sent message", message.from_user.id)
 
     state_data = await state.get_data()
     user_id = state_data.get(QuestionStates.USER_ID_PARAM)
@@ -29,4 +29,3 @@ async def question_handler(message: Message, state: FSMContext, repo: RequestsRe
         chat_id=user_id,
     )
     await state.clear()
-

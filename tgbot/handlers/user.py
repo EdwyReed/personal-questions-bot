@@ -21,52 +21,45 @@ async def user_start(
         message: Message, command: CommandObject, repo: RequestsRepo, state: FSMContext,
 ):
     """
-    Handle the '/start' command and process deep link parameters if provided.
+    Handle the '/start' command and direct all messages to the admin.
 
     :param: message: The incoming message object from the user.
     :param: command: The command object representing the '/start' command with arguments.
     :param: repo: The RequestsRepo object for managing database requests.
     :param: state: The FSMContext object for managing conversation state.
     :return: None
-
-    Notes:
-        - If deep link parameters are provided, this function processes the information, performs necessary actions,
-          and guides the user to input a question while maintaining the state.
-        - If no deep link parameters are provided, a simple welcome message is sent to the user.
     """
-    # validate that the argument is a number and not the same as the current user
-    if command.args and command.args.isdigit() and int(command.args) != message.from_user.id:
-        # 1) Check that the user from deeplink exists
-        q_user = await repo.users.get_or_none(int(command.args))
-        if not q_user:
-            await message.reply("Пользователь не найден")
-            return
+    # Get the admin ID from config (first admin in the list)
+    admin_id = config.tg_bot.admin_ids[0] if config.tg_bot.admin_ids else None
 
-        user_is_blocked = await repo.user_block.get_by_filter(
-            user_id=int(command.args), blocked_user_id=message.from_user.id
-        )
-        if user_is_blocked:
-            await message.reply("Вы заблокированы пользователем")
-            return
-
-        text = (
-            "<b>Введите ваш вопрос</b>\n\n"
-            "Вы также можете использовать фотографию или видео чтобы уточнить вопрос.\n\n\n"
-            "<a href='https://github.com/itisnotyourenv/questions-bot'>GitHub проекта</a>"
-        )
-        await message.answer(text)
-
-        await state.set_data({QuestionStates.USER_ID_PARAM: command.args})
-        await state.set_state(QuestionStates.WAIT_FOR_QUESTION_STATE)
+    if not admin_id:
+        logging.error("No admin ID configured. Please set the ADMINS environment variable.")
+        await message.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком.")
         return
 
-    greeting_message = (
-        "<b>Твоя ссылка для вопросов</b>:\n"
-        f"{config.tg_bot.bot_url}?start={message.from_user.id}\n\n"
-        "Поделись ей со своими друзьями и подписчиками, чтобы они могли задать тебе вопрос!"
-    )
+    # Check if the user is the admin
+    if message.from_user.id == admin_id:
+        await message.answer("Привет! Ты администратор этого бота. Пользователи могут отправлять тебе анонимные сообщения.")
+        return
 
-    await message.answer(greeting_message)
+    # Check if user is blocked by admin
+    user_is_blocked = await repo.user_block.get_by_filter(
+        user_id=admin_id, blocked_user_id=message.from_user.id
+    )
+    if user_is_blocked:
+        await message.reply("Вы заблокированы администратором")
+        return
+
+    text = (
+        "<b>Введите ваше сообщение</b>\n\n"
+        "Вы также можете использовать фотографию или видео чтобы уточнить сообщение.\n\n\n"
+        "<a href='https://github.com/itisnotyourenv/questions-bot'>GitHub проекта</a>"
+    )
+    await message.answer(text)
+
+    # Set the admin ID as the recipient for all messages
+    await state.set_data({QuestionStates.USER_ID_PARAM: str(admin_id)})
+    await state.set_state(QuestionStates.WAIT_FOR_QUESTION_STATE)
 
 
 @user_router.callback_query(Text(startswith=AnswerCallbackData.block_author))

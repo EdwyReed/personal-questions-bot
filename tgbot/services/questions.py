@@ -18,7 +18,7 @@ async def send_question(
     if reply_to_message_id is not None:
         prefix = "Ответ на ваше сообщение:"
     else:
-        prefix = "Анонимный вопрос:"
+        prefix = "Анонимное сообщение:"
 
     if message.text:
         message.text = question_text_pattern.format(prefix=prefix, question=message.text)

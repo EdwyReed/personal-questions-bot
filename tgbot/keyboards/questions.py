@@ -7,7 +7,7 @@ def question_answer_markup(question_id: int):
     """
     The function returns the keyboard with the buttons "Generate image" and "Block author".
 
-    :param question_id: ID of the question to be answered.
+    :param question_id: ID of the message to be answered.
     :return: InlineKeyboardMarkup
     """
     markup = InlineKeyboardMarkup(

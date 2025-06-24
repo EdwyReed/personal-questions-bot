@@ -43,5 +43,5 @@ async def question_handler(message: Message, state: FSMContext, repo: RequestsRe
     markup = question_answer_markup(message.message_id)
     await message.send_copy(user_id, reply_markup=markup)
 
-    await message.answer("Ваш вопрос отправлен адресату")
+    await message.answer("Ваше сообщение отправлено адресату")
     await state.clear()

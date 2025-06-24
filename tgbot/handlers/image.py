@@ -13,7 +13,7 @@ image_router = Router()
 
 @image_router.callback_query(Text(startswith=AnswerCallbackData.generate_image))
 async def image_generation_handler(call: types.CallbackQuery, repo: RequestsRepo, bot: Bot, config):
-    logging.info("User %s sent answer", call.from_user.id)
+    logging.info("User %s requested image generation", call.from_user.id)
     question_id = call.data.split("=")[1]
 
     question = await repo.questions.get_or_none(int(question_id))

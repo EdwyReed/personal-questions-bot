@@ -17,6 +17,6 @@ async def admin_start(message: Message, repo: RequestsRepo):
     text = (
         "📊 Небольшая статистика:\n\n"
         f"👤 Пользователей: {users_count}\n"
-        f"❓ Вопросов: {questions_count}\n"
+        f"💬 Сообщений: {questions_count}\n"
     )
     await message.answer(text)
