@@ -36,7 +36,16 @@ async def send_question(
             to_message_id=result.message_id,
             text=original_text,
         )
-        await message.answer("Сообщение отправлено.", reply_markup=new_question_markup())
+
+        # Import config here to avoid circular imports
+        from tgbot.config import load_config
+        config = load_config()
+
+        # Only include the new question markup for non-admin users
+        if message.from_user.id != config.tg_bot.admin_id:
+            await message.answer("Сообщение отправлено.", reply_markup=new_question_markup())
+        else:
+            await message.answer("Сообщение отправлено.")
     except TelegramBadRequest:
         await message.answer("Пользователь по каким-то причинам не может получать сообщения от бота.")
 

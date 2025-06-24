@@ -15,8 +15,8 @@ from infrastructure.database.setup import create_session_pool, create_engine
 from tgbot.services import broadcaster
 
 
-async def on_startup(bot: Bot, admin_ids: list[int]):
-    await broadcaster.broadcast(bot, admin_ids, "The bot was launched")
+async def on_startup(bot: Bot, admin_id: int):
+    await broadcaster.broadcast(bot, [admin_id], "The bot was launched")
 
 
 def register_global_middlewares(dp: Dispatcher, config: Config, session_pool=None):
@@ -109,7 +109,7 @@ async def main():
 
     register_global_middlewares(dp, config, session_pool)
 
-    await on_startup(bot, config.tg_bot.admin_ids)
+    await on_startup(bot, config.tg_bot.admin_id)
     await bot.delete_webhook()
     await dp.start_polling(bot)
 

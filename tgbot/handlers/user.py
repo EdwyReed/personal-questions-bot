@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 from aiogram import Router
 from aiogram.filters import CommandStart, CommandObject, Text
@@ -29,11 +30,11 @@ async def user_start(
     :param: state: The FSMContext object for managing conversation state.
     :return: None
     """
-    # Get the admin ID from config (first admin in the list)
-    admin_id = config.tg_bot.admin_ids[0] if config.tg_bot.admin_ids else None
+    # Get the admin ID from config
+    admin_id = config.tg_bot.admin_id
 
     if not admin_id:
-        logging.error("No admin ID configured. Please set the ADMINS environment variable.")
+        logging.error("No admin ID configured. Please set the ADMIN environment variable.")
         await message.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком: @edwy_reed")
         return
 
@@ -59,6 +60,9 @@ async def user_start(
         "Никто не узнает, что это был(а) ты."
     )
     await message.answer(text)
+
+
+    await asyncio.sleep(1.5)
 
     text = (
         "<b>Шёлковое эхо слушает.</b>\n"
@@ -129,11 +133,11 @@ async def clb_new_question_handler(call: CallbackQuery, state: FSMContext, repo:
     """
     logging.info("User %s sent new question request", call.from_user.id)
 
-    # Get the admin ID from config (first admin in the list)
-    admin_id = config.tg_bot.admin_ids[0] if config.tg_bot.admin_ids else None
+    # Get the admin ID from config
+    admin_id = config.tg_bot.admin_id
 
     if not admin_id:
-        logging.error("No admin ID configured. Please set the ADMINS environment variable.")
+        logging.error("No admin ID configured. Please set the ADMIN environment variable.")
         await call.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком: @edwy_reed", show_alert=True)
         return
 
