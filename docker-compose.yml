@@ -7,13 +7,13 @@ services:
     stop_signal: SIGINT
     build:
       context: .
-      args:
-        BOT_NAME: ${BOT_NAME}
     working_dir: "/usr/src/app/${BOT_NAME}"
     volumes:
       - .:/usr/src/app/${BOT_NAME}
     command: python3 -m bot
     restart: always
+    env_file:
+      - ".env"
     networks:
       - tg_bot
 
@@ -39,6 +39,8 @@ services:
              -c default_statistics_target=100 -c random_page_cost=1.1 -c effective_io_concurrency=200
              -c work_mem=3495kB -c min_wal_size=1GB -c max_wal_size=4GB -c max_worker_processes=2
              -c max_parallel_workers_per_gather=1 -c max_parallel_workers=2 -c max_parallel_maintenance_workers=1"
+    env_file:
+      - '.env'
     logging:
       driver: "json-file"
       options:
@@ -53,6 +55,8 @@ services:
     container_name: "${REDIS_CONTAINER_NAME}"
     restart: always
     command: redis-server --port $REDIS_PORT --save 20 1 --loglevel warning --requirepass $REDIS_PASSWORD
+    env_file:
+      - ".env"
     volumes:
       - ./cache:/data
     networks:
@@ -69,6 +73,8 @@ services:
     volumes:
       - .:/usr/src/app/${BOT_NAME}
     restart: always
+    env_file:
+      - ".env"
     networks:
       - tg_bot
 

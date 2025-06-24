@@ -1,7 +1,6 @@
 FROM python:3.11-slim
 
-ARG BOT_NAME
-ENV BOT_NAME=${BOT_NAME:-mybotname}
+ENV BOT_NAME=mybotname
 
 WORKDIR /usr/src/app/${BOT_NAME}
 
