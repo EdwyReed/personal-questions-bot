@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from infrastructure.database.repo.requests import RequestsRepo
-from tgbot.keyboards.questions import unblock_author_markup
+from tgbot.keyboards.questions import unblock_author_markup, new_question_markup
 from tgbot.misc.states import QuestionStates
 from tgbot.misc.callback_data import AnswerCallbackData
 from tgbot.config import load_config
@@ -34,7 +34,7 @@ async def user_start(
 
     if not admin_id:
         logging.error("No admin ID configured. Please set the ADMINS environment variable.")
-        await message.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком.")
+        await message.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком: @edwy_reed")
         return
 
     # Check if the user is the admin
@@ -51,9 +51,20 @@ async def user_start(
         return
 
     text = (
-        "<b>Введите ваше сообщение</b>\n\n"
-        "Вы также можете использовать фотографию или видео чтобы уточнить сообщение.\n\n\n"
-        "<a href='https://github.com/itisnotyourenv/questions-bot'>GitHub проекта</a>"
+        "<b>Это не просто эхо.</b>\n"
+        "Это почтовый ящик для твоих мыслей, фантазий, боли, радости и случайных признаний.\n\n"
+        "Хочешь предложить идею для текста? Пиши."
+        "Хочешь просто поговорить? Кричи. Шепчи. Плачь."
+        "Капкан слушает. Иногда отвечает.\n\n"
+        "Никто не узнает, что это был(а) ты."
+    )
+    await message.answer(text)
+
+    text = (
+        "<b>Шёлковое эхо слушает.</b>\n"
+        "Хочешь — напиши идею для сцены."
+        "Хочешь — просто расскажи, как тебя всё заебало.\n\n"
+        "Заржавевшее железо капкана всё впитает.❤️‍🩹"
     )
     await message.answer(text)
 
@@ -102,3 +113,45 @@ async def clb_unblock_author_handler(call: CallbackQuery, repo: RequestsRepo):
 
     await call.message.edit_text(text=call.message.text, reply_markup=None)
     await call.answer("Пользователь разблокирован", show_alert=True)
+
+
+@user_router.callback_query(Text(AnswerCallbackData.new_question))
+async def clb_new_question_handler(call: CallbackQuery, state: FSMContext, repo: RequestsRepo):
+    """
+    Handle the user's request to send a new question.
+
+    :param: call: The incoming callback query from the user.
+    :param: state: The FSMContext object for managing conversation state.
+    :return: None
+
+    Notes:
+        - This function sets the state to WAIT_FOR_QUESTION_STATE and prompts the user to enter a new question.
+    """
+    logging.info("User %s sent new question request", call.from_user.id)
+
+    # Get the admin ID from config (first admin in the list)
+    admin_id = config.tg_bot.admin_ids[0] if config.tg_bot.admin_ids else None
+
+    if not admin_id:
+        logging.error("No admin ID configured. Please set the ADMINS environment variable.")
+        await call.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком: @edwy_reed", show_alert=True)
+        return
+
+    # Check if user is blocked by admin
+    user_is_blocked = await repo.user_block.get_by_filter(
+        user_id=admin_id, blocked_user_id=call.from_user.id
+    )
+    if user_is_blocked:
+        await call.answer("Вы заблокированы администратором", show_alert=True)
+        return
+
+    text = (
+        "<b>Шёлковое эхо слушает.</b>\n"
+        "Отправь своё сообщение."
+    )
+    await call.message.answer(text)
+
+    # Set the admin ID as the recipient for all messages
+    await state.set_data({QuestionStates.USER_ID_PARAM: str(admin_id)})
+    await state.set_state(QuestionStates.WAIT_FOR_QUESTION_STATE)
+    await call.answer()

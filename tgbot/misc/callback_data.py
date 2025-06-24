@@ -7,6 +7,7 @@ class AnswerCallbackData:
     generate_image: str = "gi"
     block_author: str = "ba"
     unblock_author: str = "uba"
+    new_question: str = "nq"
 
     @classmethod
     def answer_callback(cls, question_id: int):
@@ -23,3 +24,7 @@ class AnswerCallbackData:
     @classmethod
     def unblock_author_callback(cls, author_id: int):
         return f"{cls.unblock_author}={author_id}"
+
+    @classmethod
+    def new_question_callback(cls):
+        return cls.new_question

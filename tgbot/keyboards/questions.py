@@ -47,3 +47,22 @@ def unblock_author_markup(author_id: int):
         ]
     )
     return markup
+
+
+def new_question_markup():
+    """
+    The function returns the keyboard with the "Send new question" button.
+
+    :return: InlineKeyboardMarkup
+    """
+    markup = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="✉️ Отправить новое сообщение",
+                    callback_data=AnswerCallbackData.new_question_callback(),
+                )
+            ],
+        ]
+    )
+    return markup

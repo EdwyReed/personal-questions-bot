@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.exceptions import TelegramBadRequest
 
 from infrastructure.database.repo.requests import RequestsRepo
-from tgbot.keyboards.questions import question_answer_markup
+from tgbot.keyboards.questions import question_answer_markup, new_question_markup
 
 
 async def send_question(
@@ -36,7 +36,7 @@ async def send_question(
             to_message_id=result.message_id,
             text=original_text,
         )
-        await message.answer("Сообщение отправлено.")
+        await message.answer("Сообщение отправлено.", reply_markup=new_question_markup())
     except TelegramBadRequest:
         await message.answer("Пользователь по каким-то причинам не может получать сообщения от бота.")
 
