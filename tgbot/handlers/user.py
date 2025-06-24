@@ -12,6 +12,10 @@ from tgbot.misc.states import QuestionStates
 from tgbot.misc.callback_data import AnswerCallbackData
 from tgbot.config import load_config
 from tgbot.services.questions import block_user
+from tgbot.template import (
+    START_BOT_NOT_CONFIGURED, START_ADMIN_GREETING, START_USER_BLOCKED,
+    WELCOME_MESSAGE_1, WELCOME_MESSAGE_2, NEW_QUESTION_PROMPT, USER_UNBLOCKED
+)
 
 user_router = Router()
 config = load_config()
@@ -35,12 +39,12 @@ async def user_start(
 
     if not admin_id:
         logging.error("No admin ID configured. Please set the ADMIN environment variable.")
-        await message.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком: @edwy_reed")
+        await message.answer(START_BOT_NOT_CONFIGURED)
         return
 
     # Check if the user is the admin
     if message.from_user.id == admin_id:
-        await message.answer("Привет! Ты администратор этого бота. Пользователи могут отправлять тебе анонимные сообщения.")
+        await message.answer(START_ADMIN_GREETING)
         return
 
     # Check if user is blocked by admin
@@ -48,29 +52,15 @@ async def user_start(
         user_id=admin_id, blocked_user_id=message.from_user.id
     )
     if user_is_blocked:
-        await message.reply("Вы заблокированы администратором")
+        await message.reply(START_USER_BLOCKED)
         return
 
-    text = (
-        "<b>Это не просто эхо.</b>\n"
-        "Это почтовый ящик для твоих мыслей, фантазий, боли, радости и случайных признаний.\n\n"
-        "Хочешь предложить идею для текста? Пиши."
-        "Хочешь просто поговорить? Кричи. Шепчи. Плачь."
-        "Капкан слушает. Иногда отвечает.\n\n"
-        "Никто не узнает, что это был(а) ты."
-    )
-    await message.answer(text)
+    await message.answer(WELCOME_MESSAGE_1)
 
 
     await asyncio.sleep(1.5)
 
-    text = (
-        "<b>Шёлковое эхо слушает.</b>\n"
-        "Хочешь — напиши идею для сцены."
-        "Хочешь — просто расскажи, как тебя всё заебало.\n\n"
-        "Заржавевшее железо капкана всё впитает.❤️‍🩹"
-    )
-    await message.answer(text)
+    await message.answer(WELCOME_MESSAGE_2)
 
     # Set the admin ID as the recipient for all messages
     await state.set_data({QuestionStates.USER_ID_PARAM: str(admin_id)})
@@ -116,7 +106,7 @@ async def clb_unblock_author_handler(call: CallbackQuery, repo: RequestsRepo):
     await repo.user_block.delete(user_blocked_id=int(user_block_id))
 
     await call.message.edit_text(text=call.message.text, reply_markup=None)
-    await call.answer("Пользователь разблокирован", show_alert=True)
+    await call.answer(USER_UNBLOCKED, show_alert=True)
 
 
 @user_router.callback_query(Text(AnswerCallbackData.new_question))
@@ -138,7 +128,7 @@ async def clb_new_question_handler(call: CallbackQuery, state: FSMContext, repo:
 
     if not admin_id:
         logging.error("No admin ID configured. Please set the ADMIN environment variable.")
-        await call.answer("Бот не настроен должным образом. Пожалуйста, свяжитесь с разработчиком: @edwy_reed", show_alert=True)
+        await call.answer(START_BOT_NOT_CONFIGURED, show_alert=True)
         return
 
     # Check if user is blocked by admin
@@ -146,14 +136,10 @@ async def clb_new_question_handler(call: CallbackQuery, state: FSMContext, repo:
         user_id=admin_id, blocked_user_id=call.from_user.id
     )
     if user_is_blocked:
-        await call.answer("Вы заблокированы администратором", show_alert=True)
+        await call.answer(START_USER_BLOCKED, show_alert=True)
         return
 
-    text = (
-        "<b>Шёлковое эхо слушает.</b>\n"
-        "Отправь своё сообщение."
-    )
-    await call.message.answer(text)
+    await call.message.answer(NEW_QUESTION_PROMPT)
 
     # Set the admin ID as the recipient for all messages
     await state.set_data({QuestionStates.USER_ID_PARAM: str(admin_id)})

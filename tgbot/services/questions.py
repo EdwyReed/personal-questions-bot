@@ -3,6 +3,7 @@ from aiogram.exceptions import TelegramBadRequest
 
 from infrastructure.database.repo.requests import RequestsRepo
 from tgbot.keyboards.questions import question_answer_markup, new_question_markup
+from tgbot.template import QUESTION_TEXT_PATTERN, QUESTION_PREFIX_REPLY, QUESTION_PREFIX_ANONYMOUS, QUESTION_SENT, QUESTION_DELIVERY_ERROR
 
 
 async def send_question(
@@ -13,17 +14,16 @@ async def send_question(
 ):
     original_text = message.text  # cache original text, we use it later to save in db
     message.__config__.allow_mutation = True
-    question_text_pattern = "<b>{prefix}</b>\n\n{question}\n\n↩️ <i>Свайпни для ответа.</i>"
 
     if reply_to_message_id is not None:
-        prefix = "Ответ на ваше сообщение:"
+        prefix = QUESTION_PREFIX_REPLY
     else:
-        prefix = "Анонимное сообщение:"
+        prefix = QUESTION_PREFIX_ANONYMOUS
 
     if message.text:
-        message.text = question_text_pattern.format(prefix=prefix, question=message.text)
+        message.text = QUESTION_TEXT_PATTERN.format(prefix=prefix, question=message.text)
     elif message.caption:
-        message.caption = question_text_pattern.format(prefix=prefix, question=message.caption)
+        message.caption = QUESTION_TEXT_PATTERN.format(prefix=prefix, question=message.caption)
 
     try:
         markup = question_answer_markup(message.message_id)
@@ -43,11 +43,11 @@ async def send_question(
 
         # Only include the new question markup for non-admin users
         if message.from_user.id != config.tg_bot.admin_id:
-            await message.answer("Сообщение отправлено.", reply_markup=new_question_markup())
+            await message.answer(QUESTION_SENT, reply_markup=new_question_markup())
         else:
-            await message.answer("Сообщение отправлено.")
+            await message.answer(QUESTION_SENT)
     except TelegramBadRequest:
-        await message.answer("Пользователь по каким-то причинам не может получать сообщения от бота.")
+        await message.answer(QUESTION_DELIVERY_ERROR)
 
 
 async def block_user(

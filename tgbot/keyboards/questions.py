@@ -1,6 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from tgbot.misc.callback_data import AnswerCallbackData
+from tgbot.template import GENERATE_IMAGE_BUTTON, BLOCK_AUTHOR_BUTTON, UNBLOCK_AUTHOR_BUTTON, NEW_QUESTION_BUTTON
 
 
 def question_answer_markup(question_id: int):
@@ -14,13 +15,13 @@ def question_answer_markup(question_id: int):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="📸 Сгенерировать изображение",
+                    text=GENERATE_IMAGE_BUTTON,
                     callback_data=AnswerCallbackData.generate_image_callback(question_id),
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="⛔️ Заблокировать автора",
+                    text=BLOCK_AUTHOR_BUTTON,
                     callback_data=AnswerCallbackData.block_author_callback(question_id),
                 )
             ],
@@ -40,7 +41,7 @@ def unblock_author_markup(author_id: int):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="👍 Разблокировать автора",
+                    text=UNBLOCK_AUTHOR_BUTTON,
                     callback_data=AnswerCallbackData.unblock_author_callback(author_id),
                 )
             ],
@@ -59,7 +60,7 @@ def new_question_markup():
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✉️ Отправить новое сообщение",
+                    text=NEW_QUESTION_BUTTON,
                     callback_data=AnswerCallbackData.new_question_callback(),
                 )
             ],
